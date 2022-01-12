@@ -1,4 +1,4 @@
-Este repositório contém uma pipeline para implantação de um blog em containeres do OpenShift como entrega do trabalho do módulo 4 do MBA de Arquitetura de Soluções da FIAP realizado pelo Grupo 19.
+Este repositório contém uma pipeline para implantação de um blog em containeres do OpenShift como entrega do trabalho do módulo 4 do MBA de Arquitetura de Soluções da FIAP (mba6aso-2021-2022) realizado pelo Grupo 19.
 
 A aplicação utilizada foi a https://github.com/openshift-instruqt/blog-django-py que foi clonada para este repositório e o banco de dados utilizado foi o PostgreSQL 10 através da utilização da imagem postgresql:10-el8 disponibilizada pela Red Hat.
 
