@@ -16,7 +16,7 @@ env:
 
   # 🖊️ EDIT to set a name for your OpenShift app, or a default one will be generated below.
   APP_NAME: "blog"
-  ROUTE: ${{ env.APP_NAME }}-route-${{ env.OPENSHIFT_NAMESPACE }}.apps.na46.prod.nextcle.com
+  # ROUTE: ${{ env.APP_NAME }}-route-${{ env.OPENSHIFT_NAMESPACE }}.apps.na46.prod.nextcle.com
 
 
 on:
