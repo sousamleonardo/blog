@@ -24,9 +24,9 @@ A implantação do Projeto é feita em 10 passos:
 
 Para implantar o projeto manualmente deverá ser utilizado o seguinte comando:
 
-oc create -f main.yaml -n "nome do projeto(namespace)"
+oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/main.yaml -n "nome do projeto(namespace)"
 
-O Arquivo "main.yaml" contempla a execução de todos os demais templates na ordem listada acima.
+O Arquivo "https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/main.yaml" contempla a execução de todos os demais templates na ordem listada acima.
 
 # Implantando automaticamente
 
