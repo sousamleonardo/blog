@@ -6,6 +6,7 @@ A aplicação utilizada foi a https://github.com/openshift-instruqt/blog-django-
 
 A implantação do Projeto é feita em 10 passos:
 
+```
 1 - Criação do Volume Persistente para o Banco de Dados
 2 - Criação do Secret para armazenar informações de usuário/senha/banco
 3 - Deployment do Banco de dados
