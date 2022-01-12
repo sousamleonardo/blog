@@ -3,7 +3,6 @@ apiVersion: route.openshift.io/v1
 metadata:
   name: blog-route
 spec:
-  host: blog-fiap-aso.apps.na46.prod.nextcle.com
   to:
     kind: Service
     name: blog
