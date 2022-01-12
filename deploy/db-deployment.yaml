@@ -1,0 +1,95 @@
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  name: sample-database-to-blog
+  namespace: fiap-aso-lmsousa
+  labels:
+    app: sample-database-to-blog
+spec:
+  selector:
+    name: sample-database-to-blog
+  replicas: 1
+  strategy:
+    type: Recreate
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    activeDeadlineSeconds: 21600
+  triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - postgresql
+        from:
+          kind: ImageStreamTag
+          namespace: openshift
+          name: 'postgresql:10-el8'
+    - type: ConfigChange
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        name: sample-database-to-blog
+    spec:
+      volumes:
+        - name: sample-database-data
+          persistentVolumeClaim:
+            claimName: sample-database-pv
+      containers:
+        - resources:
+            limits:
+              memory: 512Mi
+          readinessProbe:
+            exec:
+              command:
+                - /usr/libexec/check-container
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          name: postgresql
+          livenessProbe:
+            exec:
+              command:
+                - /usr/libexec/check-container
+                - '--live'
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          env:
+            - name: POSTGRESQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: sample-database-secret
+                  key: database-user
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sample-database-secret
+                  key: database-password
+            - name: POSTGRESQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: sample-database-secret
+                  key: database-name
+          securityContext:
+            capabilities: {}
+            privileged: false
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: sample-database-data
+              mountPath: /var/lib/pgsql/data
+          terminationMessagePolicy: File
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler

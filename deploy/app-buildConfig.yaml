@@ -1,0 +1,30 @@
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+    name: blog-build
+    namespace: fiap-aso-lmsousa
+    labels:
+        app: blog
+spec:
+    output:
+        to:
+            kind: ImageStreamTag
+            name: 'blog:latest'
+    strategy:
+        type: Source
+        sourceStrategy:
+            from:
+                kind: ImageStreamTag
+                namespace: openshift
+                name: 'python:3.8-ubi7'
+    source:
+        type: Git
+        git:
+            uri: "https://github.com/sousamleonardo/blog" 
+        contextDir: /
+    triggers:
+    - type: GitHub
+      github:
+        secret: secret101
+    - type: ConfigChange
+    - type: ImageChange
