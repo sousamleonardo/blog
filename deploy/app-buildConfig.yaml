@@ -2,7 +2,6 @@ kind: BuildConfig
 apiVersion: build.openshift.io/v1
 metadata:
     name: blog-build
-    namespace: fiap-aso-lmsousa
     labels:
         app: blog
 spec:

@@ -6,7 +6,6 @@ metadata:
       app.kubernetes.io/component: blog
       app.kubernetes.io/instance: blog
     name: blog
-    namespace: fiap-aso
 spec:
     ports:
     - name: 8080-tcp
