@@ -147,7 +147,7 @@ jobs:
       with:
         timeout_seconds: 3
         retry_wait_seconds: 10
-        max_attempts: 30
+        max_attempts: 5
         warning_on_retry: false
         command: curl -sSfLi ${{ env.APP_NAME }}-route-${{ env.OPENSHIFT_NAMESPACE }}.apps.na46.prod.nextcle.com
 
