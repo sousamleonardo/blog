@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
     annotations:
-      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"blog:latest","namespace":"leo"},"fieldPath":"spec.template.spec.containers[?(@.name==\"blog\")].image"}]'
+      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"blog:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"blog\")].image"}]'
     labels:
       app: blog
       app.kubernetes.io/component: blog
