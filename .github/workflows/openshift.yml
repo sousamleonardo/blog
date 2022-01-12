@@ -123,7 +123,7 @@ jobs:
     - name: Build da aplicação
       run: |
         oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/app-buildConfig.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
-        sleep 45
+        sleep 60
         
     - name: Deploy da aplicação no POD e associação com o Banco de dados
       run: |
@@ -147,7 +147,7 @@ jobs:
       with:
         timeout_seconds: 3
         retry_wait_seconds: 10
-        max_attempts: 5
+        max_attempts: 10
         warning_on_retry: false
         command: curl -sSfLi ${{ env.APP_NAME }}-route-${{ env.OPENSHIFT_NAMESPACE }}.apps.na46.prod.nextcle.com
 
