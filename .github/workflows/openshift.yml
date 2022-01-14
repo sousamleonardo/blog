@@ -12,7 +12,7 @@ env:
   OPENSHIFT_PASSWORD: ${{ secrets.OPENSHIFT_PASSWORD }}
   
   # 🖊️ EDIT to set the kube context's namespace after login. Leave blank to use your user's default namespace.
-  OPENSHIFT_NAMESPACE: "fiap-mba6aso-grupo19"
+  OPENSHIFT_NAMESPACE: "fiap-grupo19"
 
   # 🖊️ EDIT to set a name for your OpenShift app, or a default one will be generated below.
   APP_NAME: "blog"
@@ -96,6 +96,11 @@ jobs:
         oc delete route ${{ env.APP_NAME }}-route
       continue-on-error: true
       
+    - name: Criando Projeto
+      run: |
+        oc new-project ${{ env.OPENSHIFT_NAMESPACE }}
+      continue-on-error: true
+    
     - name: Criando Volume Persistente para o Banco de Dados
       run: |
         oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/db-persistentVolume.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
