@@ -128,7 +128,7 @@ jobs:
     - name: Build da aplicação
       run: |
         oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/app-buildConfig.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
-        sleep 80
+        sleep 60
         
     - name: Deploy da aplicação no POD e associação com o Banco de dados
       run: |
@@ -141,10 +141,6 @@ jobs:
     - name: Criando rota da aplicação
       run: |
         oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/app-route.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
-        
-    - name: Criando configuração de autoscaling da aplicação
-      run: |
-        oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/app-hpa.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
     
     - name: Test project is running
       id: test-project
@@ -165,7 +161,11 @@ jobs:
       run: |
         oc rsh ${{ steps.pod.outputs.name}} .s2i/action_hooks/setup
       continue-on-error: true
-
+  
+    - name: Criando configuração de autoscaling da aplicação
+      run: |
+        oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/app-hpa.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
+        
     - name: Print application URL
       run: |
         [[ -n ${{ env.APP_NAME }}-route-${{ env.OPENSHIFT_NAMESPACE }}.apps.na46.prod.nextcle.com ]] || (echo "Determining application route failed in previous step"; exit 1)
