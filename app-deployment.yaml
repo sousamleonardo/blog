@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    annotations:
+      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"blog:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"blog\")].image"}]'
+    labels:
+      app: blog
+      app.kubernetes.io/component: blog
+      app.kubernetes.io/instance: blog
+    name: blog
+spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        deployment: blog
+    strategy: {}
+    template:
+      metadata:
+        labels:
+          deployment: blog
+      spec:
+        containers:
+        - env:
+          - name: DATABASE_URL
+            value: postgresql://sampledb:sampledb@sample-database-to-blog:5432/sampledb
+          - name: DJANGO_ADMIN_USERNAME
+            value: user
+          - name: DJANGO_ADMIN_EMAIL
+            value: grupo19@fiap.com
+          - name: DJANGO_ADMIN_PASSWORD
+            value: mba12345
+          image: ' '
+          name: blog
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}

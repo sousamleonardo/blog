@@ -1,0 +1,273 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: sample-database-pv
+    
+spec:
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 1Gi
+    storageClassName: standard
+    volumeMode: Filesystem
+
+---
+
+kind: Secret
+apiVersion: v1
+metadata:
+    name: sample-database-secret
+    
+data:
+  database-name: c2FtcGxlZGI=
+  database-password: c2FtcGxlZGI=
+  database-user: c2FtcGxlZGI=
+
+---
+
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  name: sample-database-to-blog
+  
+  labels:
+    app: sample-database-to-blog
+spec:
+  selector:
+    name: sample-database-to-blog
+  replicas: 1
+  strategy:
+    type: Recreate
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    activeDeadlineSeconds: 21600
+  triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - postgresql
+        from:
+          kind: ImageStreamTag
+          namespace: openshift
+          name: 'postgresql:10-el8'
+    - type: ConfigChange
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        name: sample-database-to-blog
+    spec:
+      volumes:
+        - name: sample-database-data
+          persistentVolumeClaim:
+            claimName: sample-database-pv
+      containers:
+        - resources:
+            limits:
+              memory: 512Mi
+          readinessProbe:
+            exec:
+              command:
+                - /usr/libexec/check-container
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          name: postgresql
+          livenessProbe:
+            exec:
+              command:
+                - /usr/libexec/check-container
+                - '--live'
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          env:
+            - name: POSTGRESQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: sample-database-secret
+                  key: database-user
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sample-database-secret
+                  key: database-password
+            - name: POSTGRESQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: sample-database-secret
+                  key: database-name
+          securityContext:
+            capabilities: {}
+            privileged: false
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: sample-database-data
+              mountPath: /var/lib/pgsql/data
+          terminationMessagePolicy: File
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+    name: sample-database-to-blog
+    
+spec:
+  ports:
+    - name: postgresql
+      protocol: TCP
+      port: 5432
+      targetPort: 5432
+  selector:
+    name: sample-database-to-blog
+
+---
+
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+    name: blog
+    
+
+---
+
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+    name: blog-build
+    
+    labels:
+        app: blog
+spec:
+    output:
+        to:
+            kind: ImageStreamTag
+            name: 'blog:latest'
+    strategy:
+        type: Source
+        sourceStrategy:
+            from:
+                kind: ImageStreamTag
+                namespace: openshift
+                name: 'python:3.8-ubi7'
+    source:
+        type: Git
+        git:
+            uri: "https://github.com/sousamleonardo/blog" 
+        contextDir: /
+    triggers:
+    - type: GitHub
+      github:
+        secret: secret101
+    - type: ConfigChange
+    - type: ImageChange
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    annotations:
+      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"blog:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"blog\")].image"}]'
+    labels:
+      app: blog
+      app.kubernetes.io/component: blog
+      app.kubernetes.io/instance: blog
+    name: blog
+spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        deployment: blog
+    strategy: {}
+    template:
+      metadata:
+        labels:
+          deployment: blog
+      spec:
+        containers:
+        - env:
+          - name: DATABASE_URL
+            value: postgresql://sampledb:sampledb@sample-database-to-blog:5432/sampledb
+          - name: DJANGO_ADMIN_USERNAME
+            value: user
+          - name: DJANGO_ADMIN_EMAIL
+            value: grupo19@fiap.com
+          - name: DJANGO_ADMIN_PASSWORD
+            value: mba12345
+          image: ' '
+          name: blog
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+    labels:
+      app: blog
+      app.kubernetes.io/component: blog
+      app.kubernetes.io/instance: blog
+    name: blog
+    
+spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deployment: blog
+          
+---
+
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: blog-route
+spec:
+  to:
+    kind: Service
+    name: blog
+    weight: 100
+  port:
+    targetPort: 8080-tcp
+  wildcardPolicy: None
+  
+---
+
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: blog-hpa
+  
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: blog
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          averageUtilization: 20
+          type: Utilization
