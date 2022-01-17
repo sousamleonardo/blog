@@ -99,5 +99,6 @@ jobs:
         echo "::set-output name=name::$(oc get pods -n fiap-grupo19 --selector deployment=blog -o name)"
     
     - name: Criando usuário e estruturas de Banco de dados
-      run: oc rsh ${{ steps.pod.outputs.name}} .s2i/action_hooks/setup
+      run: |
+        oc rsh ${{ steps.pod.outputs.name}} .s2i/action_hooks/setup
     
