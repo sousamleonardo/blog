@@ -88,10 +88,60 @@ jobs:
         insecure_skip_tls_verify: true
         namespace: ${{ env.OPENSHIFT_NAMESPACE }}
 
+    - name: Delete application´s resources and configurations
+      run: |
+        oc delete all --selector app=${{ env.APP_NAME }}
+        oc delete imagestream ${{ env.APP_NAME }}
+        oc delete HorizontalPodAutoscaler ${{ env.APP_NAME }}-hpa
+        oc delete route ${{ env.APP_NAME }}-route
+      continue-on-error: true
+      
+    - name: Criando Projeto
+      run: |
+        oc new-project ${{ env.OPENSHIFT_NAMESPACE }}
+      continue-on-error: true
     
+    - name: Criando Volume Persistente para o Banco de Dados
+      run: |
+        oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/db-persistentVolume.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
+      continue-on-error: true
+    
+    - name: Criando Secret para armazenar informações de usuário/senha/banco
+      run: |
+        oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/db-secret.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
+      continue-on-error: true
+      
+    - name: Deployment do Banco de dados
+      run: |
+        oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/db-deployment.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
+      continue-on-error: true
+    
+    - name: Criando serviço do Banco de dados
+      run: |
+        oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/db-service.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
+      continue-on-error: true
+      
+    - name: Criando repositório de Imagem para a aplicação
+      run: |
+        oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/app-imageStream.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
+        
+    - name: Build da aplicação
+      run: |
+        oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/app-buildConfig.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
+        sleep 60
+        
+    - name: Deploy da aplicação no POD e associação com o Banco de dados
+      run: |
+        oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/app-deployment.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
+        
+    - name: Criando serviço da aplicação
+      run: |
+        oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/app-service.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
+        
     - name: POD
       run: | 
         oc get pods -n fiap-grupo19 --selector deployment=blog -o name
+        sleep 20
     
     - name: Obtendo o nome do POD da aplicação
       id: pod
@@ -102,3 +152,28 @@ jobs:
       run: |
         oc rsh ${{ steps.pod.outputs.name}} .s2i/action_hooks/setup
     
+    - name: Criando rota da aplicação
+      run: |
+        oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/app-route.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
+        
+    - name: Criando configuração de autoscaling da aplicação
+      run: |
+        oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/app-hpa.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
+    
+    - name: Test project is running
+      id: test-project
+      uses: nick-invision/retry@v2.2.0
+      with:
+        timeout_seconds: 3
+        retry_wait_seconds: 10
+        max_attempts: 10
+        warning_on_retry: false
+        command: curl -sSfLi ${{ env.APP_NAME }}-route-${{ env.OPENSHIFT_NAMESPACE }}.apps.na46.prod.nextcle.com
+
+    - name: Print application URL
+      run: |
+        [[ -n ${{ env.APP_NAME }}-route-${{ env.OPENSHIFT_NAMESPACE }}.apps.na46.prod.nextcle.com ]] || (echo "Determining application route failed in previous step"; exit 1)
+        echo
+        echo "======================== Your application is available at: ========================"
+        echo ${{ env.APP_NAME }}-route-${{ env.OPENSHIFT_NAMESPACE }}.apps.na46.prod.nextcle.com
+        echo "==================================================================================="
