@@ -140,10 +140,13 @@ jobs:
         
     - name: Obtendo o nome do POD da aplicação
       id: pod
-      run: echo "::set-output name=pod-name::$(oc get pods --selector deployment=blog -o name)"
+      run: | 
+        echo "::set-output name=name::$(oc get pods --selector deployment=blog -o name)"
+        oc get pods --selector deployment=blog -o name
     
-    - name: Get IP Address
-      run: oc rsh ${{ steps.pod.outputs.pod-name}} .s2i/action_hooks/setup
+    - name: Criando usuário e estruturas de Banco de dados
+      run: echo "${{ steps.pod.outputs.name}}"
+      #run: oc rsh ${{ steps.pod.outputs.pod-name}} .s2i/action_hooks/setup
     
     - name: Criando rota da aplicação
       run: |
