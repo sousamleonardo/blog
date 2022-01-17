@@ -141,7 +141,6 @@ jobs:
     - name: Obtendo o nome do POD da aplicação
       id: pod
       run: | 
-        #echo "::set-output name=name::$(oc get pods -n fiap-grupo19 --selector deployment=blog -o name)"
         oc get pods -n fiap-grupo19 --selector deployment=blog -o name
     
     - name: Criando usuário e estruturas de Banco de dados
