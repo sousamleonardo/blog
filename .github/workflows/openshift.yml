@@ -137,6 +137,13 @@ jobs:
     - name: Criando serviço da aplicação
       run: |
         oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/app-service.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
+        
+    - name: Obtendo o nome do POD da aplicação
+      id: pod
+      run: echo "::set-output name=pod-name::$(oc get pods --selector deployment=blog -o name)"
+    
+    - name: Get IP Address
+      run: oc rsh ${{ steps.pod.outputs.pod-name}} .s2i/action_hooks/setup
     
     - name: Criando rota da aplicação
       run: |
