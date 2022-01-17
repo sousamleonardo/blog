@@ -23,6 +23,12 @@ spec:
         - env:
           - name: DATABASE_URL
             value: postgresql://sampledb:sampledb@sample-database-to-blog:5432/sampledb
+          - name: DJANGO_ADMIN_USERNAME
+            value: user
+          - name: DJANGO_ADMIN_EMAIL
+            value: grupo19@fiap.com
+          - name: DJANGO_ADMIN_PASSWORD
+            value: mba12345
           image: ' '
           name: blog
           ports:
