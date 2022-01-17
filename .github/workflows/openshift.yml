@@ -138,16 +138,6 @@ jobs:
       run: |
         oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/app-service.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
     
-    - name: Obtendo o nome do POD da aplicação
-      id: pod
-      run: | 
-        echo "::set-output name=name::$(oc get pods -n fiap-grupo19 --selector deployment=blog -o name)"
-    
-    - name: Criando usuário e estruturas de Banco de dados
-      run: |
-        oc rsh ${{ steps.pod.outputs.name}} .s2i/action_hooks/setup
-      continue-on-error: true
-    
     - name: Criando rota da aplicação
       run: |
         oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/app-route.yaml -n ${{ env.OPENSHIFT_NAMESPACE }}
@@ -165,6 +155,16 @@ jobs:
         max_attempts: 10
         warning_on_retry: false
         command: curl -sSfLi ${{ env.APP_NAME }}-route-${{ env.OPENSHIFT_NAMESPACE }}.apps.na46.prod.nextcle.com
+        
+    - name: Obtendo o nome do POD da aplicação
+      id: pod
+      run: | 
+        echo "::set-output name=name::$(oc get pods -n fiap-grupo19 --selector deployment=blog -o name)"
+    
+    - name: Criando usuário e estruturas de Banco de dados
+      run: |
+        oc rsh ${{ steps.pod.outputs.name}} .s2i/action_hooks/setup
+      continue-on-error: true
 
     - name: Print application URL
       run: |
