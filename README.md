@@ -48,7 +48,6 @@ Aguarde até que o deployment e todas as configurações sejam executadas (aprox
 
 ```
 oc get pods --selector deployment=blog -o name -n "nome do projeto(namespace)"
-
 ```
 
 Como resultado da execução do comando acima, é esperada a seguinte saída (exemplo):
@@ -56,20 +55,18 @@ Como resultado da execução do comando acima, é esperada a seguinte saída (ex
 ```
 pod/blog-7779899fd9-9tph9
 pod/blog-7779899fd9-qcvc7
-
 ```
 
 Então, como último passo pra deixar o seu blog configurado, execute o comando 
 
 ```
-oc rsh "nome do pod" .s2i/action_hooks/setup -n "nome do projeto(namespace)"
+oc -n "nome do projeto(namespace)" rsh "nome do pod" .s2i/action_hooks/setup
 ``` 
 
 que irá realizar a configuração da base de dados e criação do usuário master do blog. Segue um exemplo utilizando-se o nome de um dos PODs listados no comando anterior:
 
 ```
 oc -n "nome do projeto(namespace)" rsh pod/blog-7779899fd9-9tph9 .s2i/action_hooks/setup
-
 ```
 
 Como resultado da execução do comando acima, é esperada a seguinte saída (exemplo):
@@ -83,14 +80,12 @@ Running migrations:
  -----> Creating predefined Django super user
  -----> Pre-loading Django database with blog posts.
 Installed 2 object(s) from 1 fixture(s)
-
 ```
 
 Se tudo correu bem, você poderá acessar o seu blog a partir do seguinte link:
 
 ```
 http://blog-route-fiap-grupo19.apps.na46.prod.nextcle.com/
-
 ```
 
 (neste exemplo, o nome do projeto é fiap-grupo19, por isso que o link acima ficou desta maneira).
@@ -102,7 +97,6 @@ Para autenticar no blog, utilize as seguintes credenciais:
 ```
 Username: user
 Password: mba12345
-
 ```
 
 Estas credenciais são definidas como variáveis e são configuradas na etapa 7 - Deploy da aplicação no POD e associação com o Banco de dados.
