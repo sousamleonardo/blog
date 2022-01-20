@@ -22,6 +22,6 @@ ENV S2I_SCRIPTS_PATH=/usr/libexec/s2i \
 
 RUN /tmp/scripts/assemble
 
-RUN echo "Matrícula na FIAP: rm341460"
+RUN echo "Informação gerada a partir do dockerfile: rm341460" > /var/tmp/matricula.txt
 
 CMD [ "/tmp/scripts/run" ]
