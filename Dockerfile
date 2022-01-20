@@ -1,27 +1,18 @@
-FROM centos/python-35-centos7:latest
+FROM registry.access.redhat.com/ubi8/python-38
 
 MAINTAINER Leonardo Sousa <leonardo.banese@gmail.com>
 
-USER root
-
-COPY . /tmp/src
-
-RUN mv /tmp/src/.s2i/bin /tmp/scripts
-
-RUN rm -rf /tmp/src/.git* && \
-    chown -R 1001 /tmp/src && \
-    chgrp -R 0 /tmp/src && \
-    chmod -R g+w /tmp/src
-
+# Add application sources to a directory that the assemble script expects them
+# and set permissions so that the container runs without root access
+USER 0
+ADD app-src /tmp/src
+RUN /usr/bin/fix-permissions /tmp/src
 USER 1001
 
-ENV S2I_SCRIPTS_PATH=/usr/libexec/s2i \
-    S2I_BASH_ENV=/opt/app-root/etc/scl_enable \
-    DISABLE_COLLECTSTATIC=1 \
-    DISABLE_MIGRATE=1
+# Install the dependencies
+RUN /usr/libexec/s2i/assemble
 
-RUN /tmp/scripts/assemble
+# Set the default command for the resulting image
+CMD /usr/libexec/s2i/run
 
 RUN echo "Informação gerada a partir do dockerfile: rm341460" > /var/tmp/matricula.txt
-
-CMD [ "/tmp/scripts/run" ]
