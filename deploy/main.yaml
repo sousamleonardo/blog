@@ -160,18 +160,17 @@ spec:
         to:
             kind: ImageStreamTag
             name: 'blog:latest'
-    strategy:
-        type: Source
-        sourceStrategy:
-            from:
-                kind: ImageStreamTag
-                namespace: openshift
-                name: 'python:3.8-ubi7'
     source:
         type: Git
         git:
             uri: "https://github.com/sousamleonardo/blog" 
         contextDir: /
+        
+    strategy:
+        type: Docker
+        dockerStrategy:
+            dockerfilePath: Dockerfile
+
     triggers:
     - type: GitHub
       github:
