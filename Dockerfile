@@ -1,5 +1,7 @@
 FROM centos/python-35-centos7:latest
 
+MAINTAINER Leonardo Sousa <leonardo.banese@gmail.com>
+
 USER root
 
 COPY . /tmp/src
@@ -19,5 +21,7 @@ ENV S2I_SCRIPTS_PATH=/usr/libexec/s2i \
     DISABLE_MIGRATE=1
 
 RUN /tmp/scripts/assemble
+
+RUN echo "Matrícula na FIAP: rm341460"
 
 CMD [ "/tmp/scripts/run" ]
