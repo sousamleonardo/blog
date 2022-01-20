@@ -28,7 +28,7 @@ Este repositório executa automaticamente todos os templates a partir do github 
 
 # Implantando manualmente
 
-Para implantar o projeto manualmente é esperado que exista um projeto (namespace), cujo nome será passado como parâmetro em alguns comandos abaixo.
+Será necessário o client do OC para execução de comandos remotos. Todo este roteiro prevê a existência do client, autenticação e que haja um projeto (namespace), cujo nome será passado como parâmetro em alguns comandos abaixo.
 
 O primeiro passo será executar o seguinte comando:
 
