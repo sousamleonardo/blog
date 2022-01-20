@@ -25,6 +25,16 @@ A implantação do Projeto é feita em 10 passos:
 
 Este repositório executa automaticamente todos os templates a partir do github actions.
 
+Para que a implantação seja realizada em outra plataforma, os seguintes secrets deste repositório precisarão ser alterados, pois os atuais estão com os valores do aluno owner deste repo.
+
+```
+(settings->secrets)
+
+OPENSHIFT_PASSWORD
+OPENSHIFT_SERVER
+OPENSHIFT_USERNAME
+```
+
 
 # Implantando manualmente
 
