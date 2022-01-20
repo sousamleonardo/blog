@@ -2,6 +2,8 @@ Este repositório contém uma pipeline para implantação de um blog em containe
 
 A aplicação utilizada foi a https://github.com/openshift-instruqt/blog-django-py que foi clonada para este repositório e o banco de dados utilizado foi o PostgreSQL 10 através da utilização da imagem postgresql:10-el8 disponibilizada pela Red Hat.
 
+Para os pods da aplicação foi utilizado um dockerfile customizado https://raw.githubusercontent.com/sousamleonardo/blog/master/Dockerfile que utiliza uma imagem da Red Hat: registry.access.redhat.com/ubi8/python-38
+
 # Como funciona a implantação?
 
 A implantação do Projeto é feita em 10 passos:
@@ -19,10 +21,16 @@ A implantação do Projeto é feita em 10 passos:
 10 - Criação da configuração de autoscaling da aplicação
 
 ```
+# Implantando automaticamente
+
+Este repositório executa automaticamente todos os templates a partir do github actions.
+
 
 # Implantando manualmente
 
-Para implantar o projeto manualmente deverá ser utilizado o seguinte comando:
+Para implantar o projeto manualmente é esperado que exista um projeto (namespace), cujo nome será passado como parâmetro em alguns comandos abaixo.
+
+O primeiro passo será executar o seguinte comando:
 
 ```
 oc create -f https://raw.githubusercontent.com/sousamleonardo/blog/master/deploy/main.yaml -n "nome do projeto(namespace)"
@@ -100,7 +108,3 @@ Password: mba12345
 ```
 
 Estas credenciais são definidas como variáveis e são configuradas na etapa 7 - Deploy da aplicação no POD e associação com o Banco de dados.
-
-# Implantando automaticamente
-
-Este repositório executa automaticamente todos os templates a partir do github actions.
